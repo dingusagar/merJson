@@ -17,7 +17,7 @@ Time complexity  will be O(MN).
 All other extra operations will be bounded by this complexity.
 For example parsing json data to a python dictionary is linear complexity with respect to characters in the json text.
 
-Each file is read once. converted to python dictionary, appended to the result json dictionary/
+Each file is read once. converted to python dictionary, appended to the result json dictionary.
 Insert operations in existing json dictionary are O(1)
 
 
