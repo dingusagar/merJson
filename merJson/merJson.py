@@ -62,6 +62,3 @@ class MerJson:
 
         self.write_file(output_base_name,dir,dest_json_file)
 
-
-merjson = MerJson()
-merjson.merge_by_filename_prefix('out','data','merged',10)
