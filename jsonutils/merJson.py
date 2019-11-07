@@ -2,12 +2,14 @@ import json
 import glob
 import os
 import logging
+import sys
 
 logging.basicConfig(level=logging.INFO)
 
 
 class MerJson:
     current_dir = os.path.dirname(os.path.realpath(__file__))
+    output_file_seq_no = 0
     extension_name = '.json'
 
     def read_json_to_dic(self, filename):
@@ -64,11 +66,9 @@ class MerJson:
         logging.info(f'  Json Files to process : {files} ')
 
         total_size = 0
-        filename = files[0]
-        dest_json_file = self.read_json_to_dic(filename)
-        logging.info(f' Processing file : {filename} ')
+        merged_json_data = dict()
 
-        for filename in files[1:]:
+        for filename in files:
             total_size += os.path.getsize(filename)
 
             if total_size > max_file_size:
@@ -77,6 +77,7 @@ class MerJson:
 
             logging.info(f' Processing file : {filename} ')
             json_to_merge = self.read_json_to_dic(filename)
-            dest_json_file = self.merge(src_json=json_to_merge, dest_json=dest_json_file)
+            merged_json_data = self.merge(src_json=json_to_merge, dest_json=merged_json_data)
 
-        self.write_file(output_base_name, dir, dest_json_file)
+        self.write_file(output_base_name, dir, merged_json_data)
+        return merged_json_data

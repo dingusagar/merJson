@@ -1,12 +1,14 @@
+import os
+import sys
 import unittest
 from jsonutils.merJson import MerJson
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock
 import json
 
 
 class MerJson_MergeTest(unittest.TestCase):
     def setUp(self):
-        self.merJson = MerJson
+        self.merJson = MerJson()
 
     def test_merge_2_json_with_same_key(self):
         json1 = json.loads("""{"strikers": [
@@ -27,7 +29,7 @@ class MerJson_MergeTest(unittest.TestCase):
                 ] }
         """
 
-        result_string = json.dumps(self.merJson.merge(self.merJson, json2, json1))
+        result_string = json.dumps(self.merJson.merge(json2, json1))
         json_merged_string = json.dumps(json.loads(json_merged_string))  # removing whitespaces
         assert json_merged_string == result_string
 
@@ -51,7 +53,7 @@ class MerJson_MergeTest(unittest.TestCase):
                 ]  }
         """
 
-        result_string = json.dumps(self.merJson.merge(self.merJson, json2, json1))
+        result_string = json.dumps(self.merJson.merge(json2, json1))
         json_merged_string = json.dumps(json.loads(json_merged_string))  # removing whitespaces
         assert json_merged_string == result_string
 
@@ -65,7 +67,7 @@ class MerJson_MergeTest(unittest.TestCase):
 
         json_merged_string = json.dumps(json1)
 
-        result_string = json.dumps(self.merJson.merge(self.merJson, json2, json1))
+        result_string = json.dumps(self.merJson.merge(json2, json1))
         json_merged_string = json.dumps(json.loads(json_merged_string))  # removing whitespaces
         assert json_merged_string == result_string
 
@@ -88,18 +90,63 @@ class MerJson_MergeTest(unittest.TestCase):
                 ] }
         """
 
-        result_string = json.dumps(self.merJson.merge(self.merJson, json2, json1))
+        result_string = json.dumps(self.merJson.merge(json2, json1))
         json_merged_string = json.dumps(json.loads(json_merged_string))  # removing whitespaces
         assert json_merged_string == result_string
 
 
-# class MerJson_SizeLimitsTest(unittest.TestCase):
-#     def setUp(self):
-#         self.merJson = MerJson
-#
-#     def test_max_size_limit_is_not_exceeded(self):
-#
-#         self.merJson.read_json_to_dic = MagicMock(return_value=3)
+class MerJson_SizeLimitsTest(unittest.TestCase):
+    def setUp(self):
+        self.merJson = MerJson()
+
+    def test_max_size_limit_is__exceeded(self):
+        def mock_json_read_from_file(value):
+            return json.loads("""{"strikers": [
+                            { "name": "Alexis Sanchez", "club": "Manchester United" },
+                            { "name": "Robin van Persie", "club": "Feyenoord" }
+                            ] }""")
+
+        def mock_get_file_size(value):
+            return 193
+
+        self.merJson.read_json_to_dic = Mock(side_effect=mock_json_read_from_file)
+        self.merJson.list_files = Mock(return_value=['data1.json'])
+        self.merJson.write_file = Mock()
+        os.path.getsize = Mock(side_effect=mock_get_file_size)
+
+        max_size = 192
+        result = self.merJson.merge_by_filename_prefix(input_base_name='data', output_base_name='merge',
+                                                       max_file_size=max_size)
+
+        assert sys.getsizeof(json.dumps(result)) <= max_size
+        assert json.dumps(result) == '{}'
+
+    def test_max_size_limit_is_not_exceeded(self):
+        json_data_text = """{"strikers": [
+                            { "name": "Alexis Sanchez", "club": "Manchester United" },
+                            { "name": "Robin van Persie", "club": "Feyenoord" }
+                            ] }"""
+
+        def mock_json_read_from_file(value):
+            return json.loads(json_data_text)
+
+        def mock_get_file_size(value):
+            return 193
+
+        def remove_newlines_from_json_text(json_text):
+            return json.dumps(json.loads(json_text))
+
+        self.merJson.read_json_to_dic = Mock(side_effect=mock_json_read_from_file)
+        self.merJson.list_files = Mock(return_value=['data1.json'])
+        self.merJson.write_file = Mock()
+        os.path.getsize = Mock(side_effect=mock_get_file_size)
+
+        max_size = 193
+        result = self.merJson.merge_by_filename_prefix(input_base_name='data', output_base_name='merge',
+                                                       max_file_size=max_size)
+
+        assert sys.getsizeof(json.dumps(result)) <= max_size
+        assert json.dumps(result) == remove_newlines_from_json_text(json_data_text)
 
 
 if __name__ == '__main__':
