@@ -2,7 +2,6 @@ import json
 import glob
 import os
 import logging
-import sys
 
 logging.basicConfig(level=logging.INFO)
 
@@ -24,6 +23,12 @@ class MerJson:
         return files
 
     def merge(self, src_json, dest_json):
+        '''
+        merge two json objects of the form {"key" : [ JSON, JSON, ..]}
+        :param src_json:
+        :param dest_json:
+        :return:
+        '''
 
         for key in src_json:
 
@@ -35,6 +40,11 @@ class MerJson:
         return dest_json
 
     def get_output_filename(self, path_prefix):
+        '''
+        gets the next valid filename with prefix and sequence number
+        :param path_prefix:
+        :return:
+        '''
         files = self.list_files(path_prefix)
         if len(files) > 0:
 
@@ -60,6 +70,15 @@ class MerJson:
             logging.info(f' Writing merged file : {filename} ')
 
     def merge_by_filename_prefix(self, input_base_name, output_base_name, max_file_size, dir=current_dir):
+
+        '''
+
+        :param input_base_name:  input files will be named with this prefix + sequence number + extension . eg : data1.json
+        :param output_base_name: output files will be named with this prefix + sequence number + extension . eg : merge1.json
+        :param max_file_size: max size limit of the output file. output file size is guaranteed to be <= max_file_size
+        :param dir: the directory where the files are preset, defaults to current directory of the program.
+        :return:
+        '''
 
         path_prefix = os.path.join(dir, input_base_name)
         files = self.list_files(path_prefix)
