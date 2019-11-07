@@ -24,9 +24,9 @@ Insert operations in existing json dictionary are O(1)
 
 ## Features
 
-Everytime the program is run, new output file is generated with the next valid sequence number in that directory.
+Every time the program is run, new output file is generated with the next valid sequence number in that directory.
 
-Suffices in the input files need not be consequtive intergers. The program handles the numeric sorting of these suffixes.
+Suffices in the input files need not be consecutive integers. The program handles the numeric sorting of these suffixes.
 For eg : data1.json , data3.json, data456.json
 
 supporting non-English characters.
